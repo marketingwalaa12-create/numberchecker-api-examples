@@ -1,82 +1,67 @@
 # NumberChecker API Examples
 
-Practical API examples for using NumberChecker.cloud to validate bulk TXT contact lists, create processing jobs, poll job status, and download completed results.
+Code examples for integrating the NumberChecker.cloud API into bulk contact verification workflows.
 
-NumberChecker.cloud supports bulk CSV/TXT style contact verification workflows for services such as WhatsApp number checking, phone number status detection, RCS status detection, iOS/iMessage status checks, email verification, Telegram checks, and carrier/network lookup.
+NumberChecker.cloud helps verify and clean contact lists before outreach, CRM import, campaign preparation, or internal data processing. The API supports services such as WhatsApp number checking, phone number status detection, RCS status checks, iOS/iMessage status checks, Telegram checks, email verification, and carrier/network lookup.
 
 API docs: https://docs.numberchecker.cloud  
 API base URL: `https://api.numberchecker.cloud/api/v1`  
-Website: https://numberchecker.cloud
+Website: https://www.numberchecker.cloud
 
-## Why This Repo Exists
+## What's Included
 
-This repository is meant to become the public GitHub examples package for NumberChecker.cloud.
+This repository includes working examples for common API tasks:
 
-It gives developers, agencies, SaaS builders, CRM owners, and automation teams a simple way to understand how the API works before they buy credits or integrate it into their own tools. Instead of only saying "we have an API", this repo shows real implementation flows in cURL, Python, Node.js, and PHP.
+- Testing API access with `GET /test`
+- Listing available services with `GET /services`
+- Checking account balance with `GET /balance`
+- Validating a TXT upload before processing with `POST /jobs/validate`
+- Creating a processing job with `POST /jobs`
+- Polling job status with `GET /jobs/{job_id}`
+- Downloading completed results with `GET /jobs/{job_id}/download`
 
-It also creates a clean SEO asset. A useful GitHub repo can appear in Google and GitHub search for searches such as:
+Examples are included for:
 
-- `WhatsApp number checker API`
-- `bulk WhatsApp number validation`
-- `phone number status checker API`
-- `RCS number checker API`
-- `iMessage status checker API`
-- `Telegram number checker API`
-- `bulk email verification API`
-- `CSV lead cleaning API`
-- `TXT contact list verification`
+- cURL
+- Python
+- Node.js
+- PHP
 
-The benefit is simple: people who search for technical ways to clean, verify, or filter contact lists can find the examples, understand the API, and then move to the official NumberChecker.cloud website or docs.
+## Use Cases
 
-## What Good This Can Bring NumberChecker.cloud
+These examples are useful when building tools for:
 
-- More trust: buyers can see real code instead of only sales copy.
-- More search visibility: GitHub and docs pages can rank for API and developer keywords.
-- More qualified leads: technical users can test the workflow before contacting you.
-- Easier support: you can send customers one repo instead of explaining the same setup repeatedly.
-- Better internal automation: your own tools can reuse the same examples and service slugs.
-- Safer parasite SEO: the content is useful, branded, relevant, and points to the official service.
-
-This is not a magic ranking trick. It is a public proof asset. It helps because the content is useful and directly connected to the product.
-
-## Who Should Use This
-
-- Developers integrating bulk contact verification into a CRM, panel, SaaS, or internal tool.
-- Agencies cleaning WhatsApp, phone, email, RCS, iOS, or Telegram lists before campaigns.
-- Businesses that want to validate contact files before spending money on outreach.
-- NumberChecker.cloud customers who need working examples in common languages.
-
-## What This Repo Shows
-
-- Check API access with `GET /test`
-- List supported services with `GET /services`
-- Check account balance with `GET /balance`
-- Validate an upload without spending credits using `POST /jobs/validate`
-- Create a real job using `POST /jobs`
-- Poll `GET /jobs/{job_id}`
-- Download completed results from `GET /jobs/{job_id}/download`
+- Bulk WhatsApp number checker integrations
+- Phone number status verification
+- RCS availability checking
+- iOS/iMessage number status checking
+- Telegram number or activity checks
+- Bulk email verification
+- CRM contact list cleaning
+- Lead file filtering before campaign launch
+- TXT or CSV contact validation workflows
 
 ## Quick Start
 
-1. Copy `.env.example` to `.env`.
-2. Put your API key in `.env`.
-3. Prepare a TXT file with one phone number or email per line.
-4. Run a dry-run validation first.
-5. Only create the real job after validation passes.
+Copy `.env.example` to `.env` and add your API key:
 
-Important: real uploads require at least 2,000 valid entries and no more than 1,000,000 valid entries per file.
+```bash
+NUMBERCHECKER_API_KEY=your_api_key_here
+```
 
-The included `sample-data/numbers.txt` file is only a format example. Replace it with your own compliant 2,000+ row file before creating a real job.
+Prepare a TXT file with one phone number or email address per line.
+
+Important: the included `sample-data/numbers.txt` file is only a small format example. Real uploads must follow the current API limits shown in the official docs.
 
 ## Authentication
 
-Use a bearer token:
+Send your API key as a bearer token:
 
 ```bash
 Authorization: Bearer YOUR_API_KEY
 ```
 
-Never commit real API keys to GitHub.
+Never commit real API keys, customer lists, or private contact data to a public repository.
 
 ## Common Service Slugs
 
@@ -90,102 +75,55 @@ Never commit real API keys to GitHub.
 | Telegram Status Detection | `telegram-status` |
 | Telegram Activity Detection | `telegram-days` |
 
-For the latest live service list, call:
+For the current live service catalog, call:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_API_KEY" \
   https://api.numberchecker.cloud/api/v1/services
 ```
 
-## Examples
+## Upload Flow
 
-- `examples/curl/whatsapp-checker.sh`
-- `examples/python/whatsapp_checker.py`
-- `examples/node/whatsapp-checker.mjs`
-- `examples/php/whatsapp_checker.php`
+The recommended production flow is:
 
-## Required Upload Fields
+1. Validate the file first with `/jobs/validate`.
+2. Create the job only after validation passes.
+3. Send a unique `Idempotency-Key` when creating a job.
+4. Poll the job status every 30-60 seconds.
+5. Download the result when `download_available` is `true`.
 
 Most phone-number services require:
 
-- `service_slug`
-- `country_cc`
-- `compliance_confirm=1`
-- `file`
-
-Example:
-
-```bash
-service_slug=whatsapp-checker
-country_cc=92
+```text
+service_slug
+country_cc
 compliance_confirm=1
-file=@numbers.txt
+file
 ```
 
-Use only lawful, permission-based, or otherwise compliant contact data.
+Email verification services may not require `country_cc`.
 
-## Safe Production Workflow
+## Example Files
 
-1. Validate first with `/jobs/validate`.
-2. Generate a unique `Idempotency-Key`.
-3. Create the job with `/jobs`.
-4. Poll every 30-60 seconds.
-5. Download once `download_available` is `true`.
+| File | Purpose |
+|---|---|
+| `examples/curl/whatsapp-checker.sh` | Simple terminal example for API access, balance, and validation |
+| `examples/python/whatsapp_checker.py` | Python example for validate, upload, poll, and download |
+| `examples/node/whatsapp-checker.mjs` | Node.js example using `fetch` and multipart upload |
+| `examples/php/whatsapp_checker.php` | PHP/cURL example for server-side integrations |
+| `SERVICES.md` | Quick reference for common service slugs |
+| `.env.example` | Environment variable template |
+| `sample-data/numbers.txt` | Format-only sample data |
 
-## How To Publish This On GitHub
+## Safety Notes
 
-Create a public repository named:
+Use only contact data that you are allowed to process. Do not upload scraped private data, leaked lists, customer files, or personal information into public examples.
 
-```text
-numberchecker-api-examples
-```
+Keep API keys private and rotate any key that may have been exposed.
 
-Recommended GitHub description:
+## Useful Links
 
-```text
-API examples for bulk WhatsApp number checker, phone status, RCS, iOS, Telegram, and email verification with NumberChecker.cloud
-```
-
-Recommended GitHub topics:
-
-```text
-whatsapp-api, number-checker, phone-validation, csv-verification, lead-cleaning, rcs-checker, imessage-checker, email-verification
-```
-
-After publishing, link the repo from:
-
-- https://docs.numberchecker.cloud
-- https://numberchecker.cloud
-- Relevant product pages
-- Relevant blog posts
-- YouTube descriptions when the video is about API usage or list cleaning
-- Telegram posts when the post discusses automation or developer usage
-
-Full publishing checklist: [docs/GITHUB_PUBLISHING_CHECKLIST.md](docs/GITHUB_PUBLISHING_CHECKLIST.md)
-
-## Safe SEO Usage
-
-Use this repo as a helpful documentation asset. Do not use it for spam, copied posts, fake reviews, doorway pages, or irrelevant backlink drops.
-
-Good usage:
-
-- Publish useful code examples.
-- Keep the README accurate.
-- Link to the official docs and relevant product pages.
-- Add real screenshots or API response examples later.
-- Update the repo when API behavior changes.
-
-Bad usage:
-
-- Publishing fake claims.
-- Adding unrelated keywords.
-- Posting the same README on many websites.
-- Uploading customer data.
-- Promising guaranteed marketing results.
-
-## Links
-
-- API docs: https://docs.numberchecker.cloud
+- API documentation: https://docs.numberchecker.cloud
 - WhatsApp Number Checker: https://www.numberchecker.cloud/products/whatsapp-checker.html
 - Number Status Detection: https://www.numberchecker.cloud/products/number-status.html
 - RCS Status Detection: https://www.numberchecker.cloud/products/rcs-status.html
